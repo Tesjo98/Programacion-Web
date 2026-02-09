@@ -101,10 +101,11 @@ const EvaluacionDocente = () => {
     }
   };
 
-  const obtenerValor = (programaNombre, campo) => {
+const obtenerValor = (programaNombre, campo) => {
     const registro = datos.find(d => d.programaAcademico === programaNombre);
-    // Si el valor es 0 o no existe, devolvemos cadena vacía para el contentEditable
-    return registro && registro[campo] !== 0 ? registro[campo] : "";
+    // Si no hay registro o el valor no es un número, devolvemos "0"
+    if (!registro || isNaN(Number(registro[campo]))) return "0";
+    return registro[campo];
   };
 
   // --- 3. CÁLCULOS MATEMÁTICOS (CORREGIDOS PARA EVITAR NaN) ---
@@ -206,19 +207,6 @@ const EvaluacionDocente = () => {
             </tr>
           </tbody>
         </table>
-      </div>
-
-      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '15px', marginTop: '20px' }}>
-        <button onClick={() => navigate(-1)} style={styles.navButton} title="Regresar">
-          <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-            <path d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
-          </svg>
-        </button>
-        <button onClick={() => navigate(1)} style={styles.navButton} title="Siguiente">
-          <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-            <path d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
-          </svg>
-        </button>
       </div>
     </div>
   );
