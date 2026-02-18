@@ -2,11 +2,12 @@
    1. ESTRUCTURA GENERAL Y LAYOUT
    ========================================================================== */
 .layout-container {
-    display: block; 
+    display: block;
     width: 100%;
     min-height: 100vh;
     position: relative;
-    background-color: #f4f4f4; /* Gris de fondo institucional */
+    background-color: #f4f4f4;
+    /* Gris de fondo institucional */
 }
 
 /* CONTENEDOR DE CONTENIDO (Tablas y Formatos) */
@@ -14,7 +15,8 @@
     background: white;
     width: 85%;
     max-width: 1200px;
-    margin: 40px auto 70px auto; /* Centrado horizontal */
+    margin: 40px auto 70px auto;
+    /* Centrado horizontal */
     padding: 20px;
     border-radius: 30px;
     box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
@@ -34,9 +36,11 @@
    2. SIDEBAR (Anclado a la izquierda)
    ========================================================================== */
 .sidebar {
-    position: fixed; 
-    top: 250px;      /* Ajuste debajo del header */
-    left: 0;         /* Pegado total a la izquierda */
+    position: fixed;
+    top: 250px;
+    /* Ajuste debajo del header */
+    left: 0;
+    /* Pegado total a la izquierda */
     background-color: #00264D;
     color: white;
     width: 250px;
@@ -89,6 +93,7 @@
     text-transform: uppercase;
     font-family: 'Poppins', sans-serif;
 }
+
 /* LayoutStyles.css */
 
 .main-content {
@@ -97,19 +102,58 @@
     padding: 20px;
     display: flex;
     flex-direction: column;
-    align-items: center; /* Centra los hijos horizontalmente */
+    align-items: center;
+    /* Centra los hijos horizontalmente */
     width: 100%;
 }
 
 .container {
     background: white;
-    width: 90%;          /* Ocupa el 90% del espacio disponible */
-    max-width: 1100px;   /* Pero no se estira más de esto */
-    margin: 40px auto;   /* AUTO en los lados es lo que hace el CENTRADO */
+    width: 90%;
+    /* Ocupa el 90% del espacio disponible */
+    max-width: 1100px;
+    /* Pero no se estira más de esto */
+    margin: 40px auto;
+    /* AUTO en los lados es lo que hace el CENTRADO */
     padding: 30px;
     border-radius: 30px;
     box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.1);
-    
+
     /* Asegúrate de que no tenga position: absolute ni fixed */
-    position: relative; 
+    position: relative;
+}
+
+
+/* Estilos globales para todas las tablas del SIGEST */
+.fila-datos {
+    position: relative;
+}
+
+.fila-datos:hover {
+    background-color: #f9f9f9;
+}
+
+.btn-eliminar-celda {
+    opacity: 0;
+    transition: opacity 0.2s;
+    cursor: pointer;
+    background: #ff4d4d;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+}
+
+.fila-datos:hover .btn-eliminar-celda {
+    opacity: 1;
 }
