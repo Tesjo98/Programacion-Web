@@ -1,4 +1,5 @@
-import { db } from "./firebaseConfig";
+import { auth, microsoftProvider, db } from "./firebaseConfig";
+import { signInWithPopup } from "firebase/auth";
 import {
   collection,
   addDoc,
@@ -12,27 +13,23 @@ import {
   serverTimestamp
 } from "firebase/firestore";
 
-// Nombre de la colección principal
 const COLLECTION_NAME = "evaluaciones_docentes";
 
-/**
- * Guarda o actualiza datos. Soporta tanto registros individuales (Evaluación Docente)
- * como objetos complejos con arreglos (Tablas Dinámicas).
- */
 export const saveEvaluacion = async (data) => {
   try {
-    // LÓGICA PARA TABLAS DINÁMICAS (Si el objeto tiene un ID específico como 'alumnos-eventos-...')
+    // 1. LÓGICA PARA TABLAS DINÁMICAS
     if (data.id && typeof data.id === 'string' && data.id.includes('-')) {
       const docRef = doc(db, COLLECTION_NAME, data.id);
       await setDoc(docRef, {
         ...data,
         fechaActualizacion: serverTimestamp()
       }, { merge: true });
-      console.log("Tabla dinámica guardada con éxito en Firestore");
-      return;
+
+      console.log("Tabla dinámica guardada con éxito");
+      return { success: true, id: data.id };
     }
 
-    // LÓGICA ORIGINAL PARA EVALUACIÓN DOCENTE (Registros por programaAcademico)
+    // 2. LÓGICA PARA EVALUACIÓN DOCENTE
     const q = query(
       collection(db, COLLECTION_NAME),
       where("programaAcademico", "==", data.programaAcademico),
@@ -40,24 +37,23 @@ export const saveEvaluacion = async (data) => {
     );
 
     const querySnapshot = await getDocs(q);
+    const payload = {
+      ...data,
+      calificacion: Number(data.calificacion || 0),
+      totalDocentes: Number(data.totalDocentes || 0),
+      fechaActualizacion: serverTimestamp()
+    };
 
     if (!querySnapshot.empty) {
       const docId = querySnapshot.docs[0].id;
       const docRef = doc(db, COLLECTION_NAME, docId);
-      await updateDoc(docRef, {
-        calificacion: Number(data.calificacion),
-        totalDocentes: Number(data.totalDocentes),
-        fechaActualizacion: serverTimestamp()
-      });
+      await updateDoc(docRef, payload);
       console.log("Registro actualizado con éxito");
+      return { success: true, id: docId };
     } else {
-      await addDoc(collection(db, COLLECTION_NAME), {
-        ...data,
-        calificacion: Number(data.calificacion),
-        totalDocentes: Number(data.totalDocentes),
-        fechaActualizacion: serverTimestamp()
-      });
+      const newDoc = await addDoc(collection(db, COLLECTION_NAME), payload);
       console.log("Nuevo registro creado con éxito");
+      return { success: true, id: newDoc.id };
     }
   } catch (error) {
     console.error("Error al conectar con Firebase:", error);
@@ -65,32 +61,34 @@ export const saveEvaluacion = async (data) => {
   }
 };
 
-/**
- * Obtiene registros. Si el periodo coincide con un ID de documento (Tabla dinámica),
- * devuelve ese documento específico. Si no, busca todos los registros del periodo.
- */
-export const fetchEvaluaciones = async (periodo) => {
+export const fetchEvaluaciones = async (periodoOrId) => {
   try {
-    // 1. Intentamos buscar directamente por la referencia del Document ID (Tablas dinámicas)
-    // Esto soluciona que no se encuentren los datos si el ID es el nombre del documento
-    const docRef = doc(db, COLLECTION_NAME, periodo);
+    // Intentar como ID de Documento
+    const docRef = doc(db, COLLECTION_NAME, periodoOrId);
     const docSnap = await getDoc(docRef);
 
     if (docSnap.exists()) {
-      console.log("Documento de tabla dinámica encontrado");
-      return docSnap.data();
+      return { id: docSnap.id, ...docSnap.data() };
     }
 
-    // 2. Si no es un Document ID, buscamos por el campo 'periodo' (Evaluación Docente)
-    const q = query(collection(db, COLLECTION_NAME), where("periodo", "==", periodo));
+    // Intentar como búsqueda por campo periodo
+    const q = query(collection(db, COLLECTION_NAME), where("periodo", "==", periodoOrId));
     const querySnapshot = await getDocs(q);
 
-    const resultados = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    console.log(`Se encontraron ${resultados.length} registros para el periodo ${periodo}`);
-    return resultados;
+    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
   } catch (error) {
-    console.error("Error al obtener datos de Firebase:", error);
+    console.error("Error al obtener datos:", error);
     return [];
+  }
+};
+
+export const loginWithMicrosoft = async () => {
+  try {
+    const result = await signInWithPopup(auth, microsoftProvider);
+    return result.user;
+  } catch (error) {
+    console.error("Error en login:", error);
+    throw error;
   }
 };

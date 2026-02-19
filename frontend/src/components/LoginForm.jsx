@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+// Integración: Importación del servicio de Microsoft
+import { loginWithMicrosoft } from '../api/firebaseService';
 
 const LoginForm = () => {
     const { login, isAuthenticated } = useAuth();
@@ -15,6 +17,20 @@ const LoginForm = () => {
             navigate('/dashboard', { replace: true });
         }
     }, [isAuthenticated, navigate]);
+
+    // Integración: Lógica para el botón de Microsoft
+    const handleMicrosoftLogin = async () => {
+        setError('');
+        setLoading(true);
+        try {
+            await loginWithMicrosoft();
+            navigate('/dashboard');
+        } catch (err) {
+            setError('Error al acceder con la cuenta institucional de Microsoft.');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -86,6 +102,21 @@ const LoginForm = () => {
                                 {loading ? 'Verificando...' : 'Iniciar Sesión'}
                             </button>
 
+                            {/* Integración: Botón visual de Microsoft */}
+                            <button 
+                                type="button" 
+                                className="btn-microsoft" 
+                                onClick={handleMicrosoftLogin}
+                                disabled={loading}
+                            >
+                                <img 
+                                    src="https://authjs.dev/img/providers/microsoft.svg" 
+                                    alt="MS Logo" 
+                                    style={{ width: '18px', marginRight: '10px' }} 
+                                />
+                                Entrar con @tesjo.edu.mx
+                            </button>
+
                             {error && <p className="error-msg">{error}</p>}
 
                             <p className="register-link">
@@ -105,7 +136,7 @@ const LoginForm = () => {
             </div>
 
             <style jsx="true">{`
-                /* El CSS */
+                /* El CSS Original */
                 html, body, #root, .login-page {
                     margin: 0 !important;
                     padding: 0 !important;
@@ -268,10 +299,32 @@ const LoginForm = () => {
                     cursor: pointer;
                     transition: background-color 0.3s;
                     font-size: 1rem;
+                    margin-bottom: 10px;
                 }
 
                 #btnlogin:hover {
                     background-color: #152654;
+                }
+
+                /* Integración: Estilo del botón Microsoft */
+                .btn-microsoft {
+                    width: 100%;
+                    padding: 10px;
+                    background-color: #ffffff;
+                    color: #5e5e5e;
+                    border: 1px solid #8c8c8c;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 0.9rem;
+                    font-weight: 500;
+                    transition: background-color 0.2s;
+                }
+
+                .btn-microsoft:hover {
+                    background-color: #f3f3f3;
                 }
 
                 .register-link {
@@ -292,7 +345,7 @@ const LoginForm = () => {
                     background-color: #fadbd8;
                     padding: 10px;
                     border-radius: 4px;
-                    margin-bottom: 15px;
+                    margin-top: 15px;
                     text-align: center;
                     font-size: 0.9rem;
                 }
@@ -310,9 +363,8 @@ const LoginForm = () => {
                     }
                 }
             `}</style>
-            <style jsx="true">{`/* TODO TU CSS ORIGINAL */`}</style>
         </div>
     );
 };
 
-export default LoginForm; 
+export default LoginForm;
