@@ -8,8 +8,13 @@ if (process.env.FIREBASE_SERVICE_ACCOUNT) {
     serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
 } else {
     // En local, sigue usando tu archivo por comodidad
-    const path = require('path');
-    serviceAccount = require(path.join(__dirname, 'serviceAccountKey.json'));
+    try {
+        const path = require('path');
+        serviceAccount = require(path.join(__dirname, 'serviceAccountKey.json'));
+    } catch (e) {
+        console.error('❌ No se encontró serviceAccountKey.json ni la variable FIREBASE_SERVICE_ACCOUNT');
+        process.exit(1);
+    }
 }
 
 // 2. Inicializamos Firebase DE INMEDIATO
