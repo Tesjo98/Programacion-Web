@@ -1,24 +1,30 @@
 const admin = require('firebase-admin');
-const path = require('path');
 
-// 1. Cargamos la llave primero
-const serviceAccount = require(path.join(__dirname, 'serviceAccountKey.json'));
+// 1. Cargamos la Llave desde las variables de entorno o local si existe
+let serviceAccount;
 
-// 2. Inicializamos Firebase DE INMEDIATO (fuera de la función)
-// Esto asegura que 'db' no sea nulo cuando las rutas lo necesiten
+if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+    // En producción (Render) parseamos el string JSON
+    serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+} else {
+    // En local, sigue usando tu archivo por comodidad
+    const path = require('path');
+    serviceAccount = require(path.join(__dirname, 'serviceAccountKey.json'));
+}
+
+// 2. Inicializamos Firebase DE INMEDIATO
 if (!admin.apps.length) {
     admin.initializeApp({
         credential: admin.credential.cert(serviceAccount)
     });
 }
 
-// 3. Ahora sí, exportamos la base de datos ya inicializada
+// 3. Exportamos la base de datos
 const db = admin.firestore();
 
 const connectDB = () => {
     try {
-        // Solo para confirmar en consola que todo está bien
-        console.log('✅ Servidor vinculado exitosamente a Firebase (PSICEI-TESJo)');
+        console.log('✔ Servidor vinculado exitosamente a Firebase');
     } catch (error) {
         console.error('❌ Error crítico de conexión a Firebase:', error.message);
         process.exit(1);
